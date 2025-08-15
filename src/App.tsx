@@ -7,6 +7,7 @@ function App() {
   const [wrBonus, setWrBonus] = useState<number>(40) // percent 40..100
   const [cdr, setCdr] = useState<number>(0) // percent 0+
   const [castSpeed, setCastSpeed] = useState<number>(0) // percent 0+
+  const [additionalCastSpeed, setAdditionalCastSpeed] = useState<number>(0) // percent 0+
 
   // Load initial values from URL query params on mount
   useEffect(() => {
@@ -35,6 +36,12 @@ function App() {
     if (csNum !== null && !Number.isNaN(csNum)) {
       setCastSpeed(Math.max(0, Math.min(999, csNum)))
     }
+
+    const acs = params.get('additionalCastSpeed')
+    const acsNum = acs !== null ? Number(acs) : null
+    if (acsNum !== null && !Number.isNaN(acsNum)) {
+      setAdditionalCastSpeed(Math.max(0, Math.min(999, acsNum)))
+    }
   }, [])
 
   // Reflect current values into the URL (preserve hash) whenever they change
@@ -51,19 +58,20 @@ function App() {
     params.set('wrBonus', String(wrBonus))
     params.set('cdr', String(cdr))
     params.set('castSpeed', String(castSpeed))
+    params.set('additionalCastSpeed', String(additionalCastSpeed))
 
     const newUrl = `${window.location.pathname}?${params.toString()}${window.location.hash}`
     window.history.replaceState(null, '', newUrl)
-  }, [wrCooldown, wrBonus, cdr, castSpeed])
+  }, [wrCooldown, wrBonus, cdr, castSpeed, additionalCastSpeed])
 
   const wrCastRate = useMemo(() => {
     const wrPct = Math.max(0, Math.min(100, wrBonus)) / 100 // clamp 0..100
     const cdrPct = Math.max(0, cdr) / 100
-    const csPct = Math.max(0, castSpeed) / 100
-    const denom = (1 + (wrPct * csPct)) * (1 + cdrPct)
+    const finalCsPct = Math.round(castSpeed * (1 + additionalCastSpeed / 100)) / 100 // final cast speed = cast speed % * (1 + additional cast speed), rounded to full numbers
+    const denom = (1 + (wrPct * finalCsPct)) * (1 + cdrPct)
     if (denom === 0) return Infinity
     return wrCooldown / denom
-  }, [wrCooldown, wrBonus, cdr, castSpeed])
+  }, [wrCooldown, wrBonus, cdr, castSpeed, additionalCastSpeed])
 
   // Server tick rate support (30 ticks per second)
   const tickHz = 30
@@ -79,12 +87,13 @@ function App() {
     cooldown: number,
     bonusPct: number,
     cdrPctVal: number,
-    castSpeedPctVal: number
+    castSpeedPctVal: number,
+    additionalCastSpeedPctVal: number = additionalCastSpeed
   ) => {
     const wrPct = Math.max(0, Math.min(100, bonusPct)) / 100
     const cdrPct = Math.max(0, cdrPctVal) / 100
-    const csPct = Math.max(0, castSpeedPctVal) / 100
-    const denom = (1 + (wrPct * csPct)) * (1 + cdrPct)
+    const finalCsPct = Math.round(castSpeedPctVal * (1 + additionalCastSpeedPctVal / 100)) / 100 // final cast speed = cast speed % * (1 + additional cast speed), rounded to full numbers
+    const denom = (1 + (wrPct * finalCsPct)) * (1 + cdrPct)
     const raw = denom === 0 ? Infinity : cooldown / denom
     const limited = !Number.isFinite(raw) ? Infinity : Math.ceil(raw / tickSeconds) * tickSeconds
     return { raw, limited }
@@ -122,11 +131,11 @@ function App() {
     return rows
   }
 
-  const bpWrBonus = useMemo(() => genBreakpoints('wrBonus', wrBonus, 100), [wrBonus, wrCooldown, cdr, castSpeed, wrCastRateLimited])
+  const bpWrBonus = useMemo(() => genBreakpoints('wrBonus', wrBonus, 100), [wrBonus, wrCooldown, cdr, castSpeed, additionalCastSpeed, wrCastRateLimited])
   // Limit CDR table to max 100%
-  const bpCdr = useMemo(() => genBreakpoints('cdr', cdr, 100), [wrBonus, wrCooldown, cdr, castSpeed, wrCastRateLimited])
+  const bpCdr = useMemo(() => genBreakpoints('cdr', cdr, 100), [wrBonus, wrCooldown, cdr, castSpeed, additionalCastSpeed, wrCastRateLimited])
   // Limit Cast Speed table to max 300%
-  const bpCastSpeed = useMemo(() => genBreakpoints('castSpeed', castSpeed, 300), [wrBonus, wrCooldown, cdr, castSpeed, wrCastRateLimited])
+  const bpCastSpeed = useMemo(() => genBreakpoints('castSpeed', castSpeed, 300), [wrBonus, wrCooldown, cdr, castSpeed, additionalCastSpeed, wrCastRateLimited])
 
   return (
     <main className="container">
@@ -199,6 +208,23 @@ function App() {
               }}
             />
           </div>
+
+          {/* Additional Cast speed bonus */}
+          <div className="input-row">
+            <label>Additional cast speed bonus (%):</label>
+            <input
+              className="input-control"
+              type="number"
+              min={0}
+              max={999}
+              step={0.01}
+              value={additionalCastSpeed}
+              onChange={(e) => {
+                const v = e.target.value === '' ? 0 : Number(e.target.value)
+                setAdditionalCastSpeed(Math.max(0, Math.min(999, v)))
+              }}
+            />
+          </div>
         </div>
 
         <div className="card">
@@ -210,7 +236,10 @@ function App() {
                 : '—'}
             </p>
             <p className="grey-text">
-              based on calc: {wrCooldown} / (1 + ({wrBonus}% × {castSpeed}%)) / (1 + {cdr}%)
+              Cast Speed: {castSpeed}% (base) → {Math.round(castSpeed * (1 + additionalCastSpeed / 100))}% (final)
+            </p>
+            <p className="grey-text">
+              based on calc: {wrCooldown} / (1 + ({wrBonus}% × {Math.round(castSpeed * (1 + additionalCastSpeed / 100))}%)) / (1 + {cdr}%)
             </p>
             <p className="grey-text">
               Tick rate: {tickHz} Hz (tick = {tickSeconds.toFixed(5)} s). Value is limited up to the next tick.
