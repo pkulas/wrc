@@ -1,0 +1,11 @@
+/* Minimal base styles compatible with Materialize */
+html, body {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+}
+
+/* Optional: app focuses solely on calculator; no fixed header/footer to offset */
+main.container {
+  min-height: 100vh;
+}

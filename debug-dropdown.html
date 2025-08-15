@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropdown Debug Test</title>
+    <style>
+        .debug-container {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .test-select-1 {
+            height: 34px;
+            padding: 6px 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            min-width: 120px;
+            background: white;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 8px center;
+            background-repeat: no-repeat;
+            background-size: 16px 16px;
+            padding-right: 32px;
+            cursor: pointer;
+        }
+        
+        .test-select-2 {
+            height: 34px;
+            padding: 6px 8px;
+            font-size: 14px;
+            border: 2px solid red;
+            background: yellow;
+            color: black;
+        }
+        
+        .test-select-3 {
+            /* Minimal styling to check if it shows */
+            border: 3px solid red;
+            background: cyan;
+            height: 40px;
+            width: 200px;
+        }
+        
+        .input-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .input-row label {
+            font-size: 14px;
+            color: #333;
+            margin-right: 8px;
+            min-width: 200px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>Dropdown Visibility Debug Test</h1>
+        
+        <h2>Test 1: Our current CSS styling</h2>
+        <div class="input-row">
+            <label>Wind Rhytm Cooldown (seconds):</label>
+            <select class="test-select-1" id="test1">
+                <option value="0.5">0.5</option>
+                <option value="0.6">0.6</option>
+                <option value="0.7">0.7</option>
+                <option value="0.8">0.8</option>
+            </select>
+        </div>
+        
+        <h2>Test 2: Highly visible styling</h2>
+        <div class="input-row">
+            <label>Wind Rhytm Cooldown (seconds):</label>
+            <select class="test-select-2" id="test2">
+                <option value="0.5">0.5</option>
+                <option value="0.6">0.6</option>
+                <option value="0.7">0.7</option>
+                <option value="0.8">0.8</option>
+            </select>
+        </div>
+        
+        <h2>Test 3: Minimal but visible styling</h2>
+        <div class="input-row">
+            <label>Wind Rhytm Cooldown (seconds):</label>
+            <select class="test-select-3" id="test3">
+                <option value="0.5">0.5</option>
+                <option value="0.6">0.6</option>
+                <option value="0.7">0.7</option>
+                <option value="0.8">0.8</option>
+            </select>
+        </div>
+        
+        <h2>Test 4: Default browser styling</h2>
+        <div class="input-row">
+            <label>Wind Rhytm Cooldown (seconds):</label>
+            <select id="test4">
+                <option value="0.5">0.5</option>
+                <option value="0.6">0.6</option>
+                <option value="0.7">0.7</option>
+                <option value="0.8">0.8</option>
+            </select>
+        </div>
+        
+        <script>
+            // Add event listeners to verify functionality
+            ['test1', 'test2', 'test3', 'test4'].forEach(id => {
+                document.getElementById(id).addEventListener('change', function(e) {
+                    console.log(`${id} changed to: ${e.target.value}`);
+                    alert(`${id} changed to: ${e.target.value}`);
+                });
+            });
+            
+            // Log the computed styles for debugging
+            window.addEventListener('load', function() {
+                const test1 = document.getElementById('test1');
+                const styles = window.getComputedStyle(test1);
+                console.log('Test1 computed styles:');
+                console.log('display:', styles.display);
+                console.log('visibility:', styles.visibility);
+                console.log('opacity:', styles.opacity);
+                console.log('height:', styles.height);
+                console.log('width:', styles.width);
+                console.log('background:', styles.background);
+                console.log('border:', styles.border);
+            });
+        </script>
+    </div>
+</body>
+</html>
