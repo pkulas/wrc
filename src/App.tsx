@@ -134,8 +134,8 @@ function App() {
   const bpWrBonus = useMemo(() => genBreakpoints('wrBonus', wrBonus, 100), [wrBonus, wrCooldown, cdr, castSpeed, additionalCastSpeed, wrCastRateLimited])
   // Limit CDR table to max 100%
   const bpCdr = useMemo(() => genBreakpoints('cdr', cdr, 100), [wrBonus, wrCooldown, cdr, castSpeed, additionalCastSpeed, wrCastRateLimited])
-  // Limit Cast Speed table to max 300%
-  const bpCastSpeed = useMemo(() => genBreakpoints('castSpeed', castSpeed, 300), [wrBonus, wrCooldown, cdr, castSpeed, additionalCastSpeed, wrCastRateLimited])
+  // Limit Cast Speed table to max 450%
+  const bpCastSpeed = useMemo(() => genBreakpoints('castSpeed', castSpeed, 450), [wrBonus, wrCooldown, cdr, castSpeed, additionalCastSpeed, wrCastRateLimited])
 
   return (
     <main className="container">
@@ -305,7 +305,7 @@ function App() {
             </div>
           )}
 
-          {/* Cast speed bonus table (limited to 200) */}
+          {/* Cast speed bonus table (limited to 450) */}
           {bpCastSpeed.length > 0 && (
             <div className="card">
               <div className="card-content">
